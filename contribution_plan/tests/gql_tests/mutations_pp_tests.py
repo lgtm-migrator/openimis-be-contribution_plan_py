@@ -1,9 +1,7 @@
 import datetime
-import numbers
 import base64
 from unittest import mock
 from django.test import TestCase
-from uuid import UUID
 
 import graphene
 from contribution_plan.tests.helpers import *
@@ -16,7 +14,6 @@ from graphene.test import Client
 
 
 class MutationTestPaymentPlan(TestCase):
-
     class BaseTestContext:
         def __init__(self, user):
             self.user = user
@@ -26,6 +23,7 @@ class MutationTestPaymentPlan(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(MutationTestPaymentPlan, cls).setUpClass()
         if not User.objects.filter(username='admin').exists():
             User.objects.create_superuser(username='admin', password='S\/pe®Pąßw0rd™')
         cls.user = User.objects.filter(username='admin').first()
@@ -39,15 +37,11 @@ class MutationTestPaymentPlan(TestCase):
         )
         cls.graph_client = Client(cls.schema)
 
-    @classmethod
-    def tearDownClass(cls):
-        PaymentPlan.objects.filter(id=cls.test_payment_plan.id).delete()
-
     def test_payment_plan_create(self):
         time_stamp = datetime.datetime.now()
         input_param = {
             "code": "XYZ",
-            "name": "XYZ test name xyz - "+str(time_stamp),
+            "name": "XYZ test name xyz - " + str(time_stamp),
             "benefitPlanId": self.test_product.id,
             "calculation": f"{self.test_calculation}",
             "periodicity": 12,
@@ -65,23 +59,23 @@ class MutationTestPaymentPlan(TestCase):
 
         self.assertEqual(
             (
-                "XYZ test name xyz - "+str(time_stamp),
+                "XYZ test name xyz - " + str(time_stamp),
                 "XYZ",
                 1,
                 12
             ),
             (
-                 result[0]['node']['name'],
-                 result[0]['node']['code'],
-                 result[0]['node']['version'],
-                 result[0]['node']['periodicity']
+                result[0]['node']['name'],
+                result[0]['node']['code'],
+                result[0]['node']['version'],
+                result[0]['node']['periodicity']
             )
         )
 
     def test_payment_plan_create_without_obligatory_fields(self):
         time_stamp = datetime.datetime.now()
         input_param = {
-            "name": "XYZ test name xyz - "+str(time_stamp),
+            "name": "XYZ test name xyz - " + str(time_stamp),
         }
         result_mutation = self.add_mutation("createPaymentPlan", input_param)
         self.assertEqual(True, 'errors' in result_mutation)
@@ -90,7 +84,7 @@ class MutationTestPaymentPlan(TestCase):
         time_stamp = datetime.datetime.now()
         input_param = {
             "code": "XYZ deletion",
-            "name": "XYZ test deletion xyz - "+str(time_stamp),
+            "name": "XYZ test deletion xyz - " + str(time_stamp),
             "benefitPlanId": self.test_product.id,
             "calculation": f"{self.test_calculation}",
             "periodicity": 12,
@@ -121,7 +115,7 @@ class MutationTestPaymentPlan(TestCase):
         self.test_payment_plan.version = result[0]['node']['version']
 
         self.assertEqual(
-            ("XYZ test name xxxxx", version+1),
+            ("XYZ test name xxxxx", version + 1),
             (result[0]['node']['name'], result[0]['node']['version'])
         )
 
@@ -141,7 +135,7 @@ class MutationTestPaymentPlan(TestCase):
                 totalCount
                 edges {{
                   node {{
-                    {'id' if 'id' not in params else '' }
+                    {'id' if 'id' not in params else ''}
                     {node_content_str}
                     version
                     dateValidFrom

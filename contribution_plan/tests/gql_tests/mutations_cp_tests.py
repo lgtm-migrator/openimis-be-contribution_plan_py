@@ -1,9 +1,8 @@
 import datetime
-import numbers
 import base64
+import json
 from unittest import mock
 from django.test import TestCase
-from uuid import UUID
 
 import graphene
 from contribution_plan.tests.helpers import *
@@ -16,7 +15,6 @@ from graphene.test import Client
 
 
 class MutationTestContributionPlan(TestCase):
-
     class BaseTestContext:
         def __init__(self, user):
             self.user = user
@@ -26,6 +24,7 @@ class MutationTestContributionPlan(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(MutationTestContributionPlan, cls).setUpClass()
         if not User.objects.filter(username='admin').exists():
             User.objects.create_superuser(username='admin', password='S\/pe®Pąßw0rd™')
         cls.user = User.objects.filter(username='admin').first()
@@ -42,17 +41,11 @@ class MutationTestContributionPlan(TestCase):
         )
         cls.graph_client = Client(cls.schema)
 
-    @classmethod
-    def tearDownClass(cls):
-        ContributionPlan.objects.filter(id=cls.test_contribution_plan.id).delete()
-        ContributionPlanBundle.objects.filter(id=cls.test_contribution_plan_bundle.id).delete()
-        ContributionPlanBundleDetails.objects.filter(id=cls.test_contribution_plan_details.id).delete()
-
     def test_contribution_plan_create(self):
         time_stamp = datetime.datetime.now()
         input_param = {
             "code": "XYZ",
-            "name": "XYZ test name xyz - "+str(time_stamp),
+            "name": "XYZ test name xyz - " + str(time_stamp),
             "benefitPlanId": self.test_product.id,
             "calculation": f"{self.test_calculation}",
             "periodicity": 12,
@@ -61,7 +54,7 @@ class MutationTestContributionPlan(TestCase):
         self.add_mutation("createContributionPlan", input_param)
         result = self.find_by_exact_attributes_query(
             "contributionPlan",
-            params = input_param,
+            params=input_param,
         )["edges"]
 
         converted_id = base64.b64decode(result[0]['node']['id']).decode('utf-8').split(':')[1]
@@ -70,23 +63,23 @@ class MutationTestContributionPlan(TestCase):
 
         self.assertEqual(
             (
-                "XYZ test name xyz - "+str(time_stamp),
+                "XYZ test name xyz - " + str(time_stamp),
                 "XYZ",
                 1,
                 12
             ),
             (
-                 result[0]['node']['name'],
-                 result[0]['node']['code'],
-                 result[0]['node']['version'],
-                 result[0]['node']['periodicity']
+                result[0]['node']['name'],
+                result[0]['node']['code'],
+                result[0]['node']['version'],
+                result[0]['node']['periodicity']
             )
         )
 
     def test_contribution_plan_create_without_obligatory_fields(self):
         time_stamp = datetime.datetime.now()
         input_param = {
-            "name": "XYZ test name xyz - "+str(time_stamp),
+            "name": "XYZ test name xyz - " + str(time_stamp),
         }
         result_mutation = self.add_mutation("createContributionPlan", input_param)
         self.assertEqual(True, 'errors' in result_mutation)
@@ -95,7 +88,7 @@ class MutationTestContributionPlan(TestCase):
         time_stamp = datetime.datetime.now()
         input_param = {
             "code": "XYZ deletion",
-            "name": "XYZ test deletion xyz - "+str(time_stamp),
+            "name": "XYZ test deletion xyz - " + str(time_stamp),
             "benefitPlanId": self.test_product.id,
             "calculation": f"{self.test_calculation}",
             "periodicity": 12,
@@ -103,7 +96,8 @@ class MutationTestContributionPlan(TestCase):
         self.add_mutation("createContributionPlan", input_param)
         self.add_mutation("createContributionPlan", input_param)
         result = self.find_by_exact_attributes_query("contributionPlan", {**input_param, 'isDeleted': False})
-        converted_ids = [ f"{base64.b64decode(edge['node']['id']).decode('utf-8').split(':')[1]}" for edge in result["edges"] ]
+        converted_ids = [f"{base64.b64decode(edge['node']['id']).decode('utf-8').split(':')[1]}" for edge in
+                         result["edges"]]
 
         input_param2 = {
             "uuids": converted_ids,
@@ -120,7 +114,7 @@ class MutationTestContributionPlan(TestCase):
         time_stamp = datetime.datetime.now()
         input_param = {
             "code": "XYZ deletion",
-            "name": "XYZ test deletion xyz - "+str(time_stamp),
+            "name": "XYZ test deletion xyz - " + str(time_stamp),
             "benefitPlanId": self.test_product.id,
             "calculation": f"{self.test_calculation}",
             "periodicity": 12,
@@ -151,7 +145,7 @@ class MutationTestContributionPlan(TestCase):
         self.test_contribution_plan.version = result[0]['node']['version']
 
         self.assertEqual(
-            ("XYZ test name xxxxx", version+1),
+            ("XYZ test name xxxxx", version + 1),
             (result[0]['node']['name'], result[0]['node']['version'])
         )
 
@@ -253,7 +247,7 @@ class MutationTestContributionPlan(TestCase):
                 totalCount
                 edges {{
                   node {{
-                    {'id' if 'id' not in params else '' }
+                    {'id' if 'id' not in params else ''}
                     {node_content_str}
                     version
                     dateValidFrom

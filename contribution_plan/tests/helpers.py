@@ -1,11 +1,8 @@
-import json
-from functools import lru_cache
-
 from contribution_plan.models import ContributionPlanBundle, ContributionPlan, \
     ContributionPlanBundleDetails, PaymentPlan
 from datetime import date
 
-from core.models import InteractiveUser, User
+from core.models import User
 from product.test_helpers import create_test_product
 from calculation.calculation_rule import ContributionValuationRule
 
@@ -16,7 +13,7 @@ def create_test_contribution_plan_bundle(custom_props={}):
         'is_deleted': 0,
         'code': "Contribution Plan Bundle Code",
         'name': "Contribution Plan Bundle Name",
-        'json_ext': json.dumps("{}"),
+        'json_ext': {},
         **custom_props
     }
 
@@ -26,9 +23,10 @@ def create_test_contribution_plan_bundle(custom_props={}):
     return contribution_plan_bundle
 
 
-def create_test_contribution_plan(product=None, calculation=ContributionValuationRule.uuid, custom_props={}, periodicity = 12):
+def create_test_contribution_plan(product=None, calculation=ContributionValuationRule.uuid, custom_props={},
+                                  periodicity=12):
     if not product:
-        product = create_test_product("PlanCode", custom_props={"insurance_period": 12,})
+        product = create_test_product("PlanCode", custom_props={"insurance_period": 12, })
 
     user = __get_or_create_simple_contribution_plan_user()
 
@@ -39,7 +37,7 @@ def create_test_contribution_plan(product=None, calculation=ContributionValuatio
         'benefit_plan': product,
         'periodicity': periodicity,
         'calculation': calculation,
-        'json_ext': json.dumps("{}"),
+        'json_ext': {},
         **custom_props
     }
 
@@ -61,7 +59,7 @@ def create_test_contribution_plan_bundle_details(contribution_plan_bundle=None, 
     object_data = {
         'contribution_plan_bundle': contribution_plan_bundle,
         'contribution_plan': contribution_plan,
-        'json_ext': json.dumps("{}"),
+        'json_ext': {},
         'date_created': date(2010, 10, 30),
         'user_updated': user,
         'user_created': user,
@@ -77,9 +75,9 @@ def create_test_contribution_plan_bundle_details(contribution_plan_bundle=None, 
     return contribution_plan_bundle_details
 
 
-def create_test_payment_plan(product=None, calculation=ContributionValuationRule.uuid, custom_props={}, periodicity = 1):
+def create_test_payment_plan(product=None, calculation=ContributionValuationRule.uuid, custom_props={}, periodicity=1):
     if not product:
-        product = create_test_product("PlanCode", custom_props={"insurance_period": 12,})
+        product = create_test_product("PlanCode", custom_props={"insurance_period": 12, })
 
     user = __get_or_create_simple_contribution_plan_user()
 
@@ -90,7 +88,7 @@ def create_test_payment_plan(product=None, calculation=ContributionValuationRule
         'benefit_plan': product,
         'periodicity': periodicity,
         'calculation': calculation,
-        'json_ext': json.dumps("{}"),
+        'json_ext': {},
         **custom_props
     }
 

@@ -1,4 +1,3 @@
-from datetime import date
 from functools import lru_cache
 from django.test import TestCase
 
@@ -14,6 +13,7 @@ class HelpersTest(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(HelpersTest, cls).setUpClass()
         cls.contribution_plan_bundle = cls.__create_test_contribution_plan_bundle()
         cls.contribution_plan_bundle_custom = cls.__create_test_contribution_plan_bundle(custom=True)
 
@@ -23,27 +23,21 @@ class HelpersTest(TestCase):
         cls.contribution_plan_details = cls.__create_test_contribution_plan_details()
         cls.contribution_plan_details_custom = cls.__create_test_contribution_plan_details(custom=True)
 
-    @classmethod
-    def tearDownClass(cls):
-        ContributionPlanBundleDetails.objects.filter(id__in=[cls.contribution_plan_details_custom.id, cls.contribution_plan_details.id]).delete()
-        ContributionPlan.objects.filter(id__in=[cls.contribution_plan.id, cls.contribution_plan_custom.id]).delete()
-        ContributionPlanBundle.objects.filter(id__in=[cls.contribution_plan_bundle.id, cls.contribution_plan_bundle_custom.id]).delete()
-
     def test_create_test_contribution_plan_bundle(self):
-        db_contribution_plan_bundle = ContributionPlanBundle.objects\
+        db_contribution_plan_bundle = ContributionPlanBundle.objects \
             .filter(id=self.contribution_plan_bundle.uuid).first()
 
         self.assertEqual(db_contribution_plan_bundle, self.contribution_plan_bundle,
                          "Failed to create contribution plan bundle in helper")
 
     def test_base_create_contribution_plan_bundle_custom_params(self):
-        db_contribution_plan_bundle = ContributionPlanBundle.objects\
+        db_contribution_plan_bundle = ContributionPlanBundle.objects \
             .filter(id=self.contribution_plan_bundle_custom.uuid).first()
 
         params = self.__get_custom_contribution_plan_bundle_params()
         self.assertEqual(db_contribution_plan_bundle.version, 1)
         self.assertEqual(db_contribution_plan_bundle.name, params['name'])
-        
+
     def test_create_test_contribution_plan(self):
         db_contribution_plan = ContributionPlan.objects.filter(id=self.contribution_plan.uuid).first()
 
@@ -55,17 +49,17 @@ class HelpersTest(TestCase):
         params = self.__get_custom_contribution_plan_params()
         self.assertEqual(db_contribution_plan.is_deleted, params['is_deleted'])
         self.assertEqual(db_contribution_plan.code, params['code'])
-        self.assertEqual(db_contribution_plan.periodicity, params['periodicity'])     
-        
+        self.assertEqual(db_contribution_plan.periodicity, params['periodicity'])
+
     def test_create_test_contribution_plan_details(self):
-        db_contribution_plan_details = ContributionPlanBundleDetails.objects\
+        db_contribution_plan_details = ContributionPlanBundleDetails.objects \
             .filter(id=self.contribution_plan_details.uuid).first()
 
         self.assertEqual(db_contribution_plan_details, self.contribution_plan_details,
                          "Failed to create contribution plan details in helper")
 
     def test_base_create_contribution_plan_details_custom_params(self):
-        db_contribution_plan_details = ContributionPlanBundleDetails.objects\
+        db_contribution_plan_details = ContributionPlanBundleDetails.objects \
             .filter(id=self.contribution_plan_details_custom.uuid).first()
 
         params = self.__get_custom_contribution_plan_details_params()
@@ -78,7 +72,7 @@ class HelpersTest(TestCase):
     def __get_custom_contribution_plan_bundle_params(cls):
         return {
             'name': 'Updated CPB',
-            }
+        }
 
     @classmethod
     @lru_cache(maxsize=1)
@@ -87,7 +81,7 @@ class HelpersTest(TestCase):
             'is_deleted': True,
             'code': 'Updated code',
             'periodicity': 4,
-            }
+        }
 
     @classmethod
     @lru_cache(maxsize=1)
@@ -95,7 +89,7 @@ class HelpersTest(TestCase):
         return {
             'contribution_plan': cls.__create_test_contribution_plan(True),
             'contribution_plan_bundle': cls.__create_test_contribution_plan_bundle(True),
-            }
+        }
 
     @classmethod
     def __create_test_instance(cls, function, **kwargs):

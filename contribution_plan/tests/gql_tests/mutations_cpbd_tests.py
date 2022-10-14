@@ -1,10 +1,8 @@
 import datetime
-import numbers
-import base64
-from unittest import TestCase, mock
-from uuid import UUID
+from unittest import mock
 
 import graphene
+from django.test import TestCase
 from contribution_plan.tests.helpers import *
 from contribution_plan import schema as contribution_plan_schema
 from graphene import Schema
@@ -12,7 +10,6 @@ from graphene.test import Client
 
 
 class MutationTestContributionPlanBundleDetails(TestCase):
-
     class BaseTestContext:
         def __init__(self, user):
             self.user = user
@@ -22,6 +19,7 @@ class MutationTestContributionPlanBundleDetails(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(MutationTestContributionPlanBundleDetails, cls).setUpClass()
         if not User.objects.filter(username='admin').exists():
             User.objects.create_superuser(username='admin', password='S\/pe®Pąßw0rd™')
         cls.user = User.objects.filter(username='admin').first()
@@ -37,12 +35,6 @@ class MutationTestContributionPlanBundleDetails(TestCase):
         )
 
         cls.graph_client = Client(cls.schema)
-
-    @classmethod
-    def tearDownClass(cls):
-        ContributionPlanBundleDetails.objects.filter(id=cls.test_contribution_plan_bundle_details.id).delete()
-        ContributionPlan.objects.filter(id__in=[cls.test_contribution_plan.id, cls.test_contribution_plan2.id]).delete()
-        ContributionPlanBundle.objects.filter(id=cls.test_contribution_plan_bundle.id).delete()
 
     def test_contribution_plan_bundle_details_create_without_obligatory_fields(self):
         time_stamp = datetime.datetime.now()
@@ -62,7 +54,7 @@ class MutationTestContributionPlanBundleDetails(TestCase):
         self.add_mutation("updateContributionPlanBundleDetails", input_param)
         result = self.find_by_id_query("contributionPlanBundleDetails", f"{id}")
         self.test_contribution_plan_bundle_details.version = result[0]['node']['version']
-        self.assertEqual(version+1, result[0]['node']['version'])
+        self.assertEqual(version + 1, result[0]['node']['version'])
 
     def test_contribution_plan_bundle_details_update_2_without_changing_fields_foreign_key(self):
         id = self.test_contribution_plan_bundle_details.id
@@ -129,7 +121,7 @@ class MutationTestContributionPlanBundleDetails(TestCase):
                 totalCount
                 edges {{
                   node {{
-                    {'id' if 'id' not in params else '' }
+                    {'id' if 'id' not in params else ''}
                     version
                     dateValidFrom
                     dateValidTo

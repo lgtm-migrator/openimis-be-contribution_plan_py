@@ -14,7 +14,6 @@ from contribution_plan import schema as contribution_plan_schema
 
 
 class QueryTest(TestCase):
-
     class BaseTestContext:
         user = mock.Mock(is_anonymous=False)
         user.has_perm = mock.MagicMock(return_value=False)
@@ -24,6 +23,7 @@ class QueryTest(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(QueryTest, cls).setUpClass()
         cls.test_contribution_plan_bundle = create_test_contribution_plan_bundle(
             custom_props={'code': 'SuperContributionPlan!'})
         cls.test_contribution_plan = create_test_contribution_plan()
@@ -36,13 +36,6 @@ class QueryTest(TestCase):
         )
 
         cls.graph_client = Client(cls.schema)
-
-    @classmethod
-    def tearDownClass(cls):
-        ContributionPlanBundleDetails.objects.filter(id=cls.test_contribution_plan_details.id).delete()
-        ContributionPlan.objects.filter(id=cls.test_contribution_plan.id).delete()
-        ContributionPlanBundle.objects.filter(id=cls.test_contribution_plan_bundle.id).delete()
-        PaymentPlan.objects.filter(id=cls.test_payment_plan.id).delete()
 
     def test_find_contribution_plan_bundle_existing(self):
         id = self.test_contribution_plan_bundle.id

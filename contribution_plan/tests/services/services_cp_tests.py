@@ -1,12 +1,10 @@
-import json
-
 from django.test import TestCase
-from contribution_plan.services import ContributionPlan as ContributionPlanService, ContributionPlanBundle as ContributionPlanBundleService, \
+from contribution_plan.services import ContributionPlan as ContributionPlanService, \
+    ContributionPlanBundle as ContributionPlanBundleService, \
     ContributionPlanBundleDetails as ContributionPlanBundleDetailsService, PaymentPlan as PaymentPlanService
 from contribution_plan.models import ContributionPlan, ContributionPlanBundle, \
     ContributionPlanBundleDetails, PaymentPlan
 from calculation.calculation_rule import ContributionValuationRule
-from product.models import Product
 from core.models import User
 from contribution_plan.tests.helpers import create_test_contribution_plan, \
     create_test_contribution_plan_bundle
@@ -17,6 +15,7 @@ class ServiceTestContributionPlan(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(ServiceTestContributionPlan, cls).setUpClass()
         if not User.objects.filter(username='admin').exists():
             User.objects.create_superuser(username='admin', password='S\/pe®Pąßw0rd™')
         cls.user = User.objects.filter(username='admin').first()
@@ -24,17 +23,12 @@ class ServiceTestContributionPlan(TestCase):
         cls.contribution_plan_bundle_service = ContributionPlanBundleService(cls.user)
         cls.contribution_plan_bundle_details_service = ContributionPlanBundleDetailsService(cls.user)
         cls.payment_plan_service = PaymentPlanService(cls.user)
-        cls.test_product = create_test_product("PlanCode", custom_props={"insurance_period": 12,})
+        cls.test_product = create_test_product("PlanCode", custom_props={"insurance_period": 12, })
         cls.test_product2 = create_test_product("PC", custom_props={"insurance_period": 6})
         cls.contribution_plan_bundle = create_test_contribution_plan_bundle()
         cls.contribution_plan = create_test_contribution_plan()
         cls.contribution_plan2 = create_test_contribution_plan()
         cls.calculation = ContributionValuationRule.uuid
-
-    @classmethod
-    def tearDownClass(cls):
-        ContributionPlan.objects.filter(id__in=[cls.contribution_plan.id, cls.contribution_plan2.id]).delete()
-        ContributionPlanBundle.objects.filter(id=cls.contribution_plan_bundle.id).delete()
 
     def test_contribution_plan_create(self):
         contribution_plan = {
@@ -43,7 +37,7 @@ class ServiceTestContributionPlan(TestCase):
             'benefit_plan_id': self.test_product.id,
             'periodicity': 6,
             'calculation': str(self.calculation),
-            'json_ext': json.dumps("{}"),
+            'json_ext': {},
         }
 
         response = self.contribution_plan_service.create(contribution_plan)
@@ -53,26 +47,26 @@ class ServiceTestContributionPlan(TestCase):
 
         self.assertEqual(
             (
-                 True,
-                 "Ok",
-                 "",
-                 "CP SERVICE",
-                 "Contribution Plan Name Service",
-                 1,
-                 6,
-                 self.test_product.id,
-                 str(self.calculation),
+                True,
+                "Ok",
+                "",
+                "CP SERVICE",
+                "Contribution Plan Name Service",
+                1,
+                6,
+                self.test_product.id,
+                str(self.calculation),
             ),
             (
-                 response['success'],
-                 response['message'],
-                 response['detail'],
-                 response['data']['code'],
-                 response['data']['name'],
-                 response['data']['version'],
-                 response['data']['periodicity'],
-                 response['data']['benefit_plan'],
-                 response['data']['calculation'],
+                response['success'],
+                response['message'],
+                response['detail'],
+                response['data']['code'],
+                response['data']['name'],
+                response['data']['version'],
+                response['data']['periodicity'],
+                response['data']['benefit_plan'],
+                response['data']['calculation'],
             )
         )
 
@@ -82,7 +76,7 @@ class ServiceTestContributionPlan(TestCase):
             'name': "Contribution Plan Name Service",
             'benefit_plan_id': self.test_product.id,
             'calculation': str(self.calculation),
-            'json_ext': json.dumps("{}"),
+            'json_ext': {},
         }
 
         response = self.contribution_plan_service.create(contribution_plan)
@@ -104,7 +98,7 @@ class ServiceTestContributionPlan(TestCase):
             'benefit_plan_id': self.test_product.id,
             'periodicity': 6,
             'calculation': str(self.calculation),
-            'json_ext': json.dumps("{}"),
+            'json_ext': {},
         }
 
         response = self.contribution_plan_service.create(contribution_plan)
@@ -142,7 +136,7 @@ class ServiceTestContributionPlan(TestCase):
             'benefit_plan_id': self.test_product.id,
             'periodicity': 6,
             'calculation': str(self.calculation),
-            'json_ext': json.dumps("{}"),
+            'json_ext': {},
         }
 
         response = self.contribution_plan_service.create(contribution_plan)
@@ -184,7 +178,7 @@ class ServiceTestContributionPlan(TestCase):
             'benefit_plan_id': self.test_product.id,
             'periodicity': 6,
             'calculation': str(self.calculation),
-            'json_ext': json.dumps("{}"),
+            'json_ext': {},
         }
 
         response_create = self.contribution_plan_service.create(contribution_plan)
@@ -233,7 +227,7 @@ class ServiceTestContributionPlan(TestCase):
             'benefit_plan_id': self.test_product.id,
             'periodicity': 6,
             'calculation': str(self.calculation),
-            'json_ext': json.dumps("{}"),
+            'json_ext': {},
         }
 
         response = self.contribution_plan_service.create(contribution_plan)
@@ -275,7 +269,7 @@ class ServiceTestContributionPlan(TestCase):
             'benefit_plan_id': self.test_product.id,
             'periodicity': 6,
             'calculation': str(self.calculation),
-            'json_ext': json.dumps("{}"),
+            'json_ext': {},
         }
 
         response = self.contribution_plan_service.create(contribution_plan)
@@ -320,7 +314,7 @@ class ServiceTestContributionPlan(TestCase):
             'benefit_plan_id': self.test_product.id,
             'periodicity': 6,
             'calculation': str(self.calculation),
-            'json_ext': json.dumps("{}"),
+            'json_ext': {},
         }
 
         response = self.contribution_plan_service.create(contribution_plan)
@@ -345,7 +339,8 @@ class ServiceTestContributionPlan(TestCase):
 
         # tear down the test data
         ContributionPlan.objects.filter(
-            id__in=[contribution_plan_object.id, contribution_plan_new_replaced_object.id, contribution_plan_new_replaced_object2.id]).delete()
+            id__in=[contribution_plan_object.id, contribution_plan_new_replaced_object.id,
+                    contribution_plan_new_replaced_object2.id]).delete()
 
         self.assertEqual(
             (
@@ -506,7 +501,8 @@ class ServiceTestContributionPlan(TestCase):
         }
 
         response = self.contribution_plan_bundle_service.replace(contribution_plan_bundle_to_replace)
-        contribution_plan_bundle_new_replaced_object = ContributionPlanBundle.objects.get(id=response['uuid_new_object'])
+        contribution_plan_bundle_new_replaced_object = ContributionPlanBundle.objects.get(
+            id=response['uuid_new_object'])
 
         # tear down the test data
         ContributionPlanBundle.objects.filter(
@@ -532,7 +528,6 @@ class ServiceTestContributionPlan(TestCase):
         )
 
     def test_contribution_plan_bundle_details_create(self):
-
         contribution_plan_bundle_details = {
             'contribution_plan_bundle_id': str(self.contribution_plan_bundle.id),
             'contribution_plan_id': str(self.contribution_plan.id),
@@ -545,20 +540,20 @@ class ServiceTestContributionPlan(TestCase):
 
         self.assertEqual(
             (
-                 True,
-                 "Ok",
-                 "",
-                 1,
-                 str(self.contribution_plan.id),
-                 str(self.contribution_plan_bundle.id),
+                True,
+                "Ok",
+                "",
+                1,
+                str(self.contribution_plan.id),
+                str(self.contribution_plan_bundle.id),
             ),
             (
-                 response['success'],
-                 response['message'],
-                 response['detail'],
-                 response['data']['version'],
-                 response['data']['contribution_plan'],
-                 response['data']['contribution_plan_bundle'],
+                response['success'],
+                response['message'],
+                response['detail'],
+                response['data']['version'],
+                response['data']['contribution_plan'],
+                response['data']['contribution_plan_bundle'],
             )
         )
 
@@ -577,7 +572,7 @@ class ServiceTestContributionPlan(TestCase):
             'benefit_plan_id': str(self.test_product.id),
             'periodicity': 6,
             'calculation': str(self.calculation),
-            'json_ext': json.dumps("{}"),
+            'json_ext': {},
         }
 
         response = self.contribution_plan_service.create(contribution_plan)
@@ -596,20 +591,20 @@ class ServiceTestContributionPlan(TestCase):
 
         self.assertEqual(
             (
-                 True,
-                 "Ok",
-                 "",
-                 2,
-                 str(contribution_plan_object.id),
-                 str(self.contribution_plan_bundle.id),
+                True,
+                "Ok",
+                "",
+                2,
+                str(contribution_plan_object.id),
+                str(self.contribution_plan_bundle.id),
             ),
             (
-                 response['success'],
-                 response['message'],
-                 response['detail'],
-                 response['data']['version'],
-                 response['data']['contribution_plan'],
-                 response['data']['contribution_plan_bundle'],
+                response['success'],
+                response['message'],
+                response['detail'],
+                response['data']['version'],
+                response['data']['contribution_plan'],
+                response['data']['contribution_plan_bundle'],
             )
         )
 
@@ -620,7 +615,7 @@ class ServiceTestContributionPlan(TestCase):
             'benefit_plan_id': self.test_product.id,
             'periodicity': 6,
             'calculation': str(self.calculation),
-            'json_ext': json.dumps("{}"),
+            'json_ext': {},
         }
 
         response = self.payment_plan_service.create(payment_plan)
@@ -630,26 +625,26 @@ class ServiceTestContributionPlan(TestCase):
 
         self.assertEqual(
             (
-                 True,
-                 "Ok",
-                 "",
-                 "PP SERVICE",
-                 "Payment Plan Name Service",
-                 1,
-                 6,
-                 self.test_product.id,
-                 str(self.calculation),
+                True,
+                "Ok",
+                "",
+                "PP SERVICE",
+                "Payment Plan Name Service",
+                1,
+                6,
+                self.test_product.id,
+                str(self.calculation),
             ),
             (
-                 response['success'],
-                 response['message'],
-                 response['detail'],
-                 response['data']['code'],
-                 response['data']['name'],
-                 response['data']['version'],
-                 response['data']['periodicity'],
-                 response['data']['benefit_plan'],
-                 response['data']['calculation'],
+                response['success'],
+                response['message'],
+                response['detail'],
+                response['data']['code'],
+                response['data']['name'],
+                response['data']['version'],
+                response['data']['periodicity'],
+                response['data']['benefit_plan'],
+                response['data']['calculation'],
             )
         )
 
@@ -660,7 +655,7 @@ class ServiceTestContributionPlan(TestCase):
             'benefit_plan_id': self.test_product.id,
             'periodicity': 6,
             'calculation': str(self.calculation),
-            'json_ext': json.dumps("{}"),
+            'json_ext': {},
         }
 
         response = self.payment_plan_service.create(payment_plan)
